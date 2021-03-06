@@ -41,7 +41,7 @@ def loadscoreboard():
             scoreboard.append([str(splitted2[0]), int(splitted2[1])])
             c = c + 1
  
-# Generates the Scoreboard
+# Generates the Scoreboard || I'm not sure how this sorting method exactly works, but it does what I needed it to. Found it off w3.
 def gen_scoreboard():
     global scoreboard
     print("\nHIGH SCORES!\n")
