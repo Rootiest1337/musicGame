@@ -1,11 +1,15 @@
 # program to be random quiz on music
 
 import random
+import os
 
 users = [["Admin", "Password"], ["Josh", "Letmein"], ["Will", "TeachMe"]]
 musiclist = []
 scoreboard = []
 limit = 0
+points = 0
+lives = 3
+current_user = ""
 
 # FUNCTION DEFINITION
 
@@ -23,11 +27,46 @@ def loadmusic():
         musiclist.append([str(second_split[0]), str(second_split[1])])
         c = c + 1
 
+# Pulls the details of the scoreboard from pointsDB.txt
+def loadscoreboard():
+    global scoreboard
+    f = open ("pointsDB.txt", "r")
+    string = f.read()
+    if string:
+        splitted = string.split("/")
+        count = len(splitted)
+        c = 0
+        while c < count:
+            splitted2 = splitted[c].split(",")
+            scoreboard.append([str(splitted2[0]), int(splitted2[1])])
+            c = c + 1
+ 
+# Generates the Scoreboard
+def gen_scoreboard():
+    global scoreboard
+    print("\nHIGH SCORES!\n")
+    if scoreboard:
+        scores = sorted(scoreboard, key=lambda x: x[1], reverse=True)
+        max_scores = 5
+        if max_scores > len(scores):
+            max_scores = len(scores)
+        c = 0
+        while c < max_scores:
+            print(str(c +1) + ". " + scores[c][0] + " - " + str(scores[c][1]))
+            c += 1
+        wait = input("\n\nPress RETURN to continue")
+        return
+    else: print("No High Scores yet! Get in there and makes some!")
+    wait = input("\n\nPress RETURN to continue")
+     
 # The Actual Quiz
 def quiz():
     global musiclist
     global limit
+    global points
+    global lives
     play = "y"
+    answer = " "
     while play.lower() != "n":
         quiz_no = random.randint(0, limit - 1)
         letters = gen_question(quiz_no)
@@ -37,18 +76,25 @@ def quiz():
             question = question + "s " 
             c = 0
             while c < letter_no:
-                if c < (letter_no - 1):
+                if c < (letter_no - 2):
                     question = question + str(letters[c]) + ", "
+                elif c < (letter_no - 1):
+                    question = question + str(letters[c]) + " "
                 elif c == letter_no - 1:
-                    question = question +  "and " + str(letters[c]) + "?"
+                        question = question +  "and " + str(letters[c]) + "?"
                 c = c + 1
         else:
             question  = question +  " " + str(letters[0]) + "?"
-        print(question)
-        print ("HINT: (Answer is '"+ musiclist[quiz_no][0] + ")")
-        answer = input("Answer : ")
-        play = input("Do you want to go again? (Y/N) : ")
-    exit()
+        while answer != "quit":   
+            print(question)
+            print ("HINT: (Answer is '"+ musiclist[quiz_no][0] + "')")
+            print("\nYou Currently have " + str(lives) + " attempts at this question! Your current score is " + str(points) + "!")
+            answer = input("Answer : ")
+            check_answer(answer, quiz_no)
+            if lives == 0:
+                game_over()
+                break
+        play = input("\nDo you want to play again? (Y/N) : ")
 
 # Breaks the Answer down into Letters
 def gen_question(quiz_no):
@@ -63,16 +109,61 @@ def gen_question(quiz_no):
          c = c + 1
     return question
 
-    # START OF PROGRAM
+# Check the Answer of the question
+def check_answer(answer, quiz_no):
+    global musiclist
+    global lives
+    correct_answer = musiclist[quiz_no][0].lower()
+
+# Game over process
+def game_over():
+    global points
+    global lives
+    if lives == 0:
+        print("\nOh No! You ran out of lives! Sorry but that is game over!")
+    print("\nYou managed to score " + str(points) + " points!")
+    if points == 0:
+        print("Get Gud Noob!")
+    elif points < 4:
+        print("Hey, not bad going!")
+    elif points < 10:
+        print("Good going!")
+    elif points >= 10:
+        print("Wow! You did really well!")
+
+# Menu
+def menu():
+    global current_user
+    opt = 0
+    while int(opt) != 3:
+        print("\nHi there " + current_user + "! Do you want to...\n")
+        print("1. Play the BEST game ever")
+        print("2. See the Scoreboard")
+        print("3. Quit")
+        opt = input("\nPick an Option from the menu: ")
+        if int(opt) == 1:
+            quiz() 
+        elif int(opt) == 2:
+            gen_scoreboard()
+    end_game()
+
+# Ends the game and saves the scoreboard to file
+def end_game():
+    exit()
+
+
+# START OF PROGRAM
 
 loadmusic()
+loadscoreboard()
 current_user = input("\nWhat is your name? ('Quit' to Exit): ")
 while current_user.lower() != "quit":
     pword = input("Password? : ")
     for login in users:
         if current_user.lower() == login[0].lower() and pword == login[1]:
-            quiz()
+            current_user = login[0]
+            menu()
     else:
         print("\nInvalid User and/or Password\n")
         current_user = input("What is your name? ('Quit' to Exit): ")
-exit()     
+exit()       

@@ -1,2 +1,1 @@
-\/===\/  Playerlist and scores!  \/===\/
-Josh 1
+josh, 5/jonno, 10/admin, 15/alfie, 1/kerry, 3
